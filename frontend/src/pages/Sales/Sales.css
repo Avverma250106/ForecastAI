@@ -1,0 +1,46 @@
+/* Sales Page Styles */
+.sales-page {
+    padding-bottom: var(--spacing-xl);
+}
+
+.mb-lg {
+    margin-bottom: var(--spacing-lg);
+}
+
+.import-dropzone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.import-dropzone:hover {
+    border-color: var(--color-primary);
+    background: var(--bg-hover);
+}
+
+.import-dropzone svg {
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.import-dropzone p {
+    color: var(--text-secondary);
+}
+
+.file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.import-note {
+    margin-top: var(--spacing-md);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+}

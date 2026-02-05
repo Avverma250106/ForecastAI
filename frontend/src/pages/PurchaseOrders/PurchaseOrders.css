@@ -1,0 +1,88 @@
+/* Purchase Orders Page Styles */
+.po-page {
+    padding-bottom: var(--spacing-xl);
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.items-table {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.items-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.item-row:last-of-type {
+    border-bottom: none;
+}
+
+.item-total {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.items-table .btn {
+    margin-top: var(--spacing-sm);
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.order-summary {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-lg);
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary-light);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+@media (max-width: 768px) {
+
+    .items-header,
+    .item-row {
+        grid-template-columns: 1fr;
+    }
+
+    .items-header {
+        display: none;
+    }
+
+    .item-row {
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+}

@@ -1,0 +1,38 @@
+/* Forecasts Page Styles */
+.forecasts-page {
+    padding-bottom: var(--spacing-xl);
+}
+
+.forecast-controls {
+    display: flex;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+.control-group {
+    min-width: 200px;
+}
+
+.control-group .form-select {
+    width: 100%;
+}
+
+.forecast-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.chart-container.large {
+    min-height: 400px;
+}
+
+.text-primary {
+    color: var(--color-primary-light);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
