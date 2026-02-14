@@ -22,13 +22,19 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Response interceptor - handle errors (don't auto-redirect, let components handle it)
+// Response interceptor - handle errors and clear stale tokens
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Just log the error, don't auto-redirect
+        // If we get a 401, clear the token and redirect to login
         if (error.response?.status === 401) {
-            console.warn('API 401:', error.config?.url);
+            console.warn('API 401 - clearing auth and redirecting:', error.config?.url);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Only redirect if not already on login/register page
+            if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
@@ -56,9 +62,9 @@ export const dashboardAPI = {
 
 // ============ PRODUCTS ============
 export const productsAPI = {
-    getAll: (skip = 0, limit = 100) => api.get(`/products?skip=${skip}&limit=${limit}`),
+    getAll: (skip = 0, limit = 100) => api.get(`/products/?skip=${skip}&limit=${limit}`),
     getById: (id) => api.get(`/products/${id}`),
-    create: (product) => api.post('/products', product),
+    create: (product) => api.post('/products/', product),
     update: (id, product) => api.put(`/products/${id}`, product),
     delete: (id) => api.delete(`/products/${id}`),
     getLowStock: () => api.get('/products/low-stock'),
@@ -66,16 +72,16 @@ export const productsAPI = {
 
 // ============ SUPPLIERS ============
 export const suppliersAPI = {
-    getAll: (skip = 0, limit = 100) => api.get(`/suppliers?skip=${skip}&limit=${limit}`),
+    getAll: (skip = 0, limit = 100) => api.get(`/suppliers/?skip=${skip}&limit=${limit}`),
     getById: (id) => api.get(`/suppliers/${id}`),
-    create: (supplier) => api.post('/suppliers', supplier),
+    create: (supplier) => api.post('/suppliers/', supplier),
     update: (id, supplier) => api.put(`/suppliers/${id}`, supplier),
     delete: (id) => api.delete(`/suppliers/${id}`),
 };
 
 // ============ SALES ============
 export const salesAPI = {
-    getAll: (skip = 0, limit = 100) => api.get(`/sales?skip=${skip}&limit=${limit}`),
+    getAll: (skip = 0, limit = 100) => api.get(`/sales/?skip=${skip}&limit=${limit}`),
     getById: (id) => api.get(`/sales/${id}`),
     create: (sale) => api.post('/sales', sale),
     bulkCreate: (sales) => api.post('/sales/bulk', sales),
@@ -115,7 +121,7 @@ export const forecastsAPI = {
 // ============ ALERTS ============
 export const alertsAPI = {
     getAll: (status, limit = 50) => {
-        let url = `/alerts?limit=${limit}`;
+        let url = `/alerts/?limit=${limit}`;
         if (status) url += `&status=${status}`;
         return api.get(url);
     },
@@ -128,9 +134,9 @@ export const alertsAPI = {
 
 // ============ PURCHASE ORDERS ============
 export const purchaseOrdersAPI = {
-    getAll: (skip = 0, limit = 100) => api.get(`/purchase-orders?skip=${skip}&limit=${limit}`),
+    getAll: (skip = 0, limit = 100) => api.get(`/purchase-orders/?skip=${skip}&limit=${limit}`),
     getById: (id) => api.get(`/purchase-orders/${id}`),
-    create: (order) => api.post('/purchase-orders', order),
+    create: (order) => api.post('/purchase-orders/', order),
     update: (id, order) => api.put(`/purchase-orders/${id}`, order),
     updateStatus: (id, status) => api.put(`/purchase-orders/${id}/status`, { status }),
     delete: (id) => api.delete(`/purchase-orders/${id}`),

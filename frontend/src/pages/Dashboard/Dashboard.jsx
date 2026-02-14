@@ -33,6 +33,8 @@ import {
 } from 'recharts';
 import { dashboardAPI, alertsAPI } from '../../services/api';
 import './Dashboard.css';
+import { useAuth } from '../../context/AuthContext';
+
 
 function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -45,9 +47,14 @@ function Dashboard() {
 
     const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
+    
+    const { isAuthenticated, loading: authLoading } = useAuth();
+
     useEffect(() => {
+    if (!authLoading && isAuthenticated) {
         fetchDashboardData();
-    }, []);
+    }
+    }, [authLoading, isAuthenticated]);
 
     const fetchDashboardData = async () => {
         try {
@@ -114,12 +121,20 @@ function Dashboard() {
         { date: 'Jan 29', sales: 5400, forecast: 5200 },
     ];
 
-    const mockPieData = inventoryHealth || [
+    const mockPieData = inventoryHealth && !Array.isArray(inventoryHealth)
+    ? [
+        { name: 'Healthy', value: inventoryHealth.healthy || 0, color: '#10b981' },
+        { name: 'Low Stock', value: inventoryHealth.low_stock || 0, color: '#f59e0b' },
+        { name: 'Critical', value: inventoryHealth.critical || 0, color: '#ef4444' },
+        { name: 'Overstock', value: inventoryHealth.overstock || 0, color: '#6366f1' },
+      ]
+    : [
         { name: 'Healthy', value: 65, color: '#10b981' },
         { name: 'Low Stock', value: 20, color: '#f59e0b' },
         { name: 'Critical', value: 10, color: '#ef4444' },
         { name: 'Overstock', value: 5, color: '#6366f1' },
-    ];
+      ];
+
 
     return (
         <div className="dashboard-page fade-in">

@@ -1,6 +1,3 @@
-"""
-Routers package initialization
-"""
 from app.routers.auth import router as auth_router
 from app.routers.products import router as products_router
 from app.routers.suppliers import router as suppliers_router
@@ -22,3 +19,4 @@ __all__ = [
     "purchase_orders_router",
     "dashboard_router"
 ]
+    

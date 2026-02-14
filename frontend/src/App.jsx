@@ -69,7 +69,11 @@ function AppRoutes() {
       } />
 
       {/* Protected Routes */}
-      <Route element={<Layout />}>
+      <Route element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<Products />} />
         <Route path="/forecasts" element={<Forecasts />} />
