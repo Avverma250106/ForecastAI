@@ -23,15 +23,16 @@ function Products() {
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({
-        name: '',
-        sku: '',
-        category: '',
-        supplier_id: '',
-        unit_cost: '',
-        selling_price: '',
-        reorder_point: '',
-        lead_time_days: ''
-    });
+    name: '',
+    sku: '',
+    category: '',
+    supplier_id: '',
+    unit_cost: '',
+    unit_price: '',
+    reorder_point: '',
+    safety_stock: ''
+});
+
 
     useEffect(() => {
         fetchData();
@@ -61,9 +62,9 @@ function Products() {
                 category: product.category || '',
                 supplier_id: product.supplier_id || '',
                 unit_cost: product.unit_cost || '',
-                selling_price: product.selling_price || '',
+                unit_price: product.unit_price || '',
                 reorder_point: product.reorder_point || '',
-                lead_time_days: product.lead_time_days || ''
+                safety_stock: product.safety_stock || ''
             });
         } else {
             setEditingProduct(null);
@@ -92,11 +93,12 @@ function Products() {
             const payload = {
                 ...formData,
                 unit_cost: parseFloat(formData.unit_cost) || 0,
-                selling_price: parseFloat(formData.selling_price) || 0,
+                unit_price: parseFloat(formData.unit_price) || 0,
                 reorder_point: parseInt(formData.reorder_point) || 10,
-                lead_time_days: parseInt(formData.lead_time_days) || 7,
+                safety_stock: parseInt(formData.safety_stock) || 5,
                 supplier_id: formData.supplier_id ? parseInt(formData.supplier_id) : null
             };
+
 
             if (editingProduct) {
                 await productsAPI.update(editingProduct.id, payload);
@@ -129,14 +131,7 @@ function Products() {
     );
 
     // Demo data if empty
-    const displayProducts = filteredProducts.length > 0 ? filteredProducts : [
-        { id: 1, name: 'Widget Pro X', sku: 'WPX-001', category: 'Electronics', unit_cost: 15.00, selling_price: 29.99, reorder_point: 50, current_stock: 125 },
-        { id: 2, name: 'Gadget Plus', sku: 'GP-002', category: 'Electronics', unit_cost: 25.00, selling_price: 49.99, reorder_point: 30, current_stock: 45 },
-        { id: 3, name: 'Basic Widget', sku: 'BW-003', category: 'Accessories', unit_cost: 5.00, selling_price: 12.99, reorder_point: 100, current_stock: 89 },
-        { id: 4, name: 'Premium Gadget', sku: 'PG-004', category: 'Electronics', unit_cost: 75.00, selling_price: 149.99, reorder_point: 20, current_stock: 12 },
-        { id: 5, name: 'Starter Kit', sku: 'SK-005', category: 'Bundles', unit_cost: 35.00, selling_price: 79.99, reorder_point: 25, current_stock: 67 },
-    ];
-
+    const displayProducts = filteredProducts;
     if (loading) {
         return (
             <div className="loading-container">
@@ -204,7 +199,7 @@ function Products() {
                                     <td><code>{product.sku}</code></td>
                                     <td>{product.category || '-'}</td>
                                     <td>${product.unit_cost?.toFixed(2)}</td>
-                                    <td>${product.selling_price?.toFixed(2)}</td>
+                                    <td>${product.unit_price?.toFixed(2)}</td>
                                     <td>
                                         <span className={`stock-badge ${(product.current_stock || 0) <= (product.reorder_point || 0)
                                                 ? 'low'

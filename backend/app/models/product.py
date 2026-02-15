@@ -35,7 +35,7 @@ class Product(Base):
     # Relationships
     supplier = relationship("Supplier", back_populates="products")
     sales = relationship("Sale", back_populates="product")
-    inventory = relationship("Inventory", back_populates="product", uselist=False)
+    inventory = relationship("Inventory",back_populates="product",cascade="all, delete",passive_deletes=True)
     forecasts = relationship(
     "Forecast",
     back_populates="product",

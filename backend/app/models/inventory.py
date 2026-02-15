@@ -12,7 +12,7 @@ class Inventory(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    product_id = Column(Integer, ForeignKey("products.id"), unique=True, nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id",ondelete="CASCADE"), unique=True, nullable=False)
     
     # Stock levels
     quantity_on_hand = Column(Integer, default=0)

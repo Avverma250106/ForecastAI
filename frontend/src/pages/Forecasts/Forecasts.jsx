@@ -120,11 +120,7 @@ function Forecasts() {
     })) || [];
 
     // Demo products if empty
-    const displayProducts = products.length > 0 ? products : [
-        { id: 1, name: 'Widget Pro X' },
-        { id: 2, name: 'Gadget Plus' },
-        { id: 3, name: 'Basic Widget' },
-    ];
+    const displayProducts = products;
 
     return (
         <div className="forecasts-page fade-in">

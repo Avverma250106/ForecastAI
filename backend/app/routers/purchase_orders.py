@@ -1,12 +1,9 @@
-"""
-Purchase Orders router
-"""
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import date, datetime
 import uuid
-
+from app.models.inventory import Inventory
 from app.database import get_db
 from app.models.purchase_order import PurchaseOrder, PurchaseOrderItem
 from app.models.product import Product
@@ -170,6 +167,13 @@ def create_purchase_order(
             total_cost=total_cost
         )
         db.add(item)
+        inventory = db.query(Inventory).filter(
+        Inventory.product_id == product.id,
+        Inventory.user_id == current_user.id
+        ).first()
+
+        if inventory:
+            inventory.quantity_on_order += item_data.quantity
         items.append(POItemResponse(
             id=0,
             product_id=product.id,
@@ -212,23 +216,38 @@ def update_po_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update purchase order status"""
     po = db.query(PurchaseOrder).filter(
         PurchaseOrder.id == po_id,
         PurchaseOrder.user_id == current_user.id
     ).first()
-    
+
     if not po:
         raise HTTPException(status_code=404, detail="Purchase order not found")
-    
+
     valid_statuses = ["draft", "sent", "confirmed", "shipped", "received", "cancelled"]
     if status_data.status not in valid_statuses:
-        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
-    
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    old_status = po.status
     po.status = status_data.status
-    db.commit()
     
+    if status_data.status == "received" and old_status != "received":
+        from app.models.inventory import Inventory
+
+        for item in po.items:
+            inventory = db.query(Inventory).filter(
+                Inventory.product_id == item.product_id,
+                Inventory.user_id == current_user.id
+            ).first()
+
+            if inventory:
+                inventory.quantity_on_hand += item.quantity
+                inventory.quantity_on_order -= item.quantity
+
+    db.commit()
+
     return {"message": f"PO status updated to {status_data.status}"}
+
 
 
 @router.get("/{po_id}/pdf")

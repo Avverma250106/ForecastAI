@@ -186,25 +186,21 @@ function PurchaseOrders() {
         }
     };
 
-    // Demo data
-    const displayOrders = orders.length > 0 ? orders : [
-        { id: 1, po_number: 'PO-2024-001', supplier_name: 'Acme Supplies', total_amount: 2450.00, status: 'sent', created_at: '2024-01-28', items_count: 3 },
-        { id: 2, po_number: 'PO-2024-002', supplier_name: 'Widget Corp', total_amount: 1875.50, status: 'pending', created_at: '2024-01-29', items_count: 2 },
-        { id: 3, po_number: 'PO-2024-003', supplier_name: 'Tech Parts Inc', total_amount: 5200.00, status: 'draft', created_at: '2024-01-30', items_count: 5 },
-        { id: 4, po_number: 'PO-2024-004', supplier_name: 'Acme Supplies', total_amount: 890.00, status: 'received', created_at: '2024-01-25', items_count: 1 },
-    ];
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            await purchaseOrdersAPI.updateStatus(id, { status: newStatus });
+            fetchData();
+        } catch (error) {
+            console.error("Failed to update status:", error);
+        }
+    };
 
-    const displaySuppliers = suppliers.length > 0 ? suppliers : [
-        { id: 1, name: 'Acme Supplies' },
-        { id: 2, name: 'Widget Corp' },
-        { id: 3, name: 'Tech Parts Inc' },
-    ];
 
-    const displayProducts = products.length > 0 ? products : [
-        { id: 1, name: 'Widget Pro X', unit_cost: 15.00 },
-        { id: 2, name: 'Gadget Plus', unit_cost: 25.00 },
-        { id: 3, name: 'Basic Widget', unit_cost: 5.00 },
-    ];
+    const displayOrders = orders;
+
+    const displaySuppliers = suppliers;
+
+    const displayProducts = products;
 
     if (loading) {
         return (
@@ -250,7 +246,7 @@ function PurchaseOrders() {
                                     <td><code>{order.po_number}</code></td>
                                     <td>{order.supplier_name}</td>
                                     <td>{order.items_count || order.items?.length || 0} items</td>
-                                    <td><strong>${order.total_amount?.toLocaleString()}</strong></td>
+                                    <td><strong>${order.total?.toLocaleString()}</strong></td>
                                     <td>
                                         <span className={`badge ${getStatusBadge(order.status)}`}>
                                             {getStatusIcon(order.status)}
@@ -277,12 +273,24 @@ function PurchaseOrders() {
                                             {order.status === 'draft' && (
                                                 <button
                                                     className="btn btn-ghost btn-sm text-success"
-                                                    onClick={() => handleUpdateStatus(order.id, 'pending')}
-                                                    title="Submit"
+                                                    onClick={() => handleStatusChange(order.id, 'sent')}
+                                                    title="Send Order"
                                                 >
                                                     <Check size={16} />
                                                 </button>
                                             )}
+
+                                            {order.status === 'sent' && (
+                                                <button
+                                                    className="btn btn-ghost btn-sm text-info"
+                                                    onClick={() => handleStatusChange(order.id, 'received')}
+                                                    title="Mark as Received"
+                                                >
+                                                    <Truck size={16} />
+                                                </button>
+                                            )}
+
+
                                             <button
                                                 className="btn btn-ghost btn-sm text-danger"
                                                 onClick={() => handleDelete(order.id)}

@@ -8,9 +8,6 @@ const API_BASE_URL = 'http://localhost:8000/api/v1';
 // Create axios instance with default config
 const api = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
 });
 
 // Request interceptor - add auth token
@@ -85,9 +82,7 @@ export const salesAPI = {
     getById: (id) => api.get(`/sales/${id}`),
     create: (sale) => api.post('/sales', sale),
     bulkCreate: (sales) => api.post('/sales/bulk', sales),
-    importCSV: (formData) => api.post('/sales/import', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+    importCSV: (formData) => api.post('/sales/import', formData),
     getByProduct: (productId, startDate, endDate) => {
         let url = `/sales/product/${productId}`;
         const params = new URLSearchParams();
@@ -110,8 +105,8 @@ export const inventoryAPI = {
 
 // ============ FORECASTS ============
 export const forecastsAPI = {
-    getByProduct: (productId, horizon = 30) =>
-        api.get(`/forecasts/product/${productId}?horizon_days=${horizon}`),
+    getByProduct: (productId) =>
+        api.get(`/forecasts/${productId}`),
     generateForProduct: (productId, horizon = 30) =>
         api.post(`/forecasts/generate/${productId}?horizon_days=${horizon}`),
     generateForAll: (horizon = 30) =>
@@ -138,7 +133,8 @@ export const purchaseOrdersAPI = {
     getById: (id) => api.get(`/purchase-orders/${id}`),
     create: (order) => api.post('/purchase-orders/', order),
     update: (id, order) => api.put(`/purchase-orders/${id}`, order),
-    updateStatus: (id, status) => api.put(`/purchase-orders/${id}/status`, { status }),
+    updateStatus: (id, statusObj) =>
+    api.put(`/purchase-orders/${id}/status`, statusObj),
     delete: (id) => api.delete(`/purchase-orders/${id}`),
     generatePDF: (id) => api.get(`/purchase-orders/${id}/pdf`, { responseType: 'blob' }),
     generateFromRecommendations: () => api.post('/purchase-orders/generate-from-recommendations'),
