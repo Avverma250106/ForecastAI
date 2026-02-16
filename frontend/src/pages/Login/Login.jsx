@@ -106,15 +106,7 @@ function Login() {
                     </div>
                 </div>
 
-                <div className="auth-features">
-                    <h2>AI-Powered Demand Forecasting</h2>
-                    <ul>
-                        <li>📊 Accurate sales predictions using ML</li>
-                        <li>🔔 Real-time stockout alerts</li>
-                        <li>📦 Automated purchase order generation</li>
-                        <li>📈 Interactive forecast visualizations</li>
-                    </ul>
-                </div>
+               
             </div>
         </div>
     );

@@ -18,11 +18,7 @@ from app.config import settings
 
 
 class ForecastService:
-    """
-    ML-powered demand forecasting service.
-    Uses historical sales data to predict future demand.
-    """
-    
+  
     def __init__(self, db: Session, user_id: int):
         self.db = db
         self.user_id = user_id
@@ -91,29 +87,44 @@ class ForecastService:
         
         return daily
     
-    def _train_model(self, df: pd.DataFrame):
-        """Train forecasting model"""
-        from sklearn.ensemble import RandomForestRegressor
-        
-        feature_cols = [
-            'day_of_week', 'day_of_month', 'month', 'week_of_year', 'is_weekend',
-            'lag_1', 'lag_7', 'lag_14', 'lag_30',
-            'rolling_mean_7', 'rolling_mean_14', 'rolling_mean_30',
-            'rolling_std_7', 'rolling_std_14', 'rolling_std_30'
-        ]
-        
-        X = df[feature_cols]
-        y = df['quantity']
-        
-        self.model = RandomForestRegressor(
-            n_estimators=100,
-            max_depth=15,
-            min_samples_split=5,
-            min_samples_leaf=2,
-            random_state=42,
-            n_jobs=-1
-        )
-        self.model.fit(X, y)
+    from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score, mean_absolute_percentage_error
+
+def _train_model(self, df: pd.DataFrame):
+    from sklearn.ensemble import RandomForestRegressor
+    
+    feature_cols = [
+        'day_of_week', 'day_of_month', 'month', 'week_of_year', 'is_weekend',
+        'lag_1', 'lag_7', 'lag_14', 'lag_30',
+        'rolling_mean_7', 'rolling_mean_14', 'rolling_mean_30',
+        'rolling_std_7', 'rolling_std_14', 'rolling_std_30'
+    ]
+
+    X = df[feature_cols]
+    y = df['quantity']
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, shuffle=False
+    )
+
+    self.model = RandomForestRegressor(
+        n_estimators=100,
+        max_depth=15,
+        random_state=42,
+        n_jobs=-1
+    )
+
+    self.model.fit(X_train, y_train)
+
+    # Evaluate model
+    y_pred = self.model.predict(X_test)
+
+    r2 = r2_score(y_test, y_pred)
+    mape = mean_absolute_percentage_error(y_test, y_pred)
+
+    self.model_accuracy = round((1 - mape) * 100, 2)
+    self.r2_score = round(r2 * 100, 2)
+
     
     def _make_predictions(self, df: pd.DataFrame, horizon_days: int) -> List[Dict]:
         """Generate predictions for future dates"""
@@ -239,8 +250,9 @@ class ForecastService:
             total_predicted_demand=round(total_demand, 2),
             avg_daily_demand=round(avg_daily, 2),
             peak_date=peak['forecast_date'],
-            peak_quantity=peak['predicted_quantity']
+            peak_quantity=peak['predicted_quantity'],
         )
+
     
     def _save_forecasts(self, product_id: int, predictions: List[Dict]):
         """Save forecast predictions to database"""

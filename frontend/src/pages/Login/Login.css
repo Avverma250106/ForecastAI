@@ -52,18 +52,16 @@
 
 .auth-container {
     display: flex;
-    gap: var(--spacing-xl);
-    max-width: 900px;
+    justify-content: center;
     width: 100%;
-    position: relative;
-    z-index: 1;
 }
 
+
 .auth-card {
-    flex: 1;
-    padding: var(--spacing-xl);
-    border-radius: var(--radius-xl);
-    animation: fadeIn 0.5s ease;
+    width: 100%;
+    max-width: 420px;  
+    padding: 2rem 2.2rem;
+    border-radius: 16px;
 }
 
 .auth-header {
@@ -95,13 +93,13 @@
 }
 
 .auth-header h1 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
+    font-size: 1.4rem;
 }
 
 .auth-header p {
-    color: var(--text-muted);
+    font-size: 0.9rem;
 }
+
 
 .auth-error {
     display: flex;
@@ -193,4 +191,11 @@
     .auth-features {
         display: none;
     }
+}
+
+.btn-primary {
+    border-radius: 10px;
+    height: 46px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }

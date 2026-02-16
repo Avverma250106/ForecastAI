@@ -47,13 +47,13 @@ function Dashboard() {
 
     const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
-    
+
     const { isAuthenticated, loading: authLoading } = useAuth();
 
     useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-        fetchDashboardData();
-    }
+        if (!authLoading && isAuthenticated) {
+            fetchDashboardData();
+        }
     }, [authLoading, isAuthenticated]);
 
     const fetchDashboardData = async () => {
@@ -92,7 +92,7 @@ function Dashboard() {
         }
     };
 
-    if (loading) {
+    if (loading || !stats) {
         return (
             <div className="loading-container">
                 <div className="loading-spinner"></div>
@@ -100,40 +100,31 @@ function Dashboard() {
         );
     }
 
-    // Mock data for demo if API returns empty
-    const defaultStats = {
-        total_products: 156,
-        total_revenue: 284500,
-        active_alerts: 12,
-        pending_orders: 8,
-        low_stock_items: 23,
-        revenue_change: 12.5,
-        forecast_accuracy: 94.2
-    };
+    const displayStats = stats;
 
-    const displayStats = stats || defaultStats;
+    const chartData = salesChart.length > 0
+        ? salesChart.map(item => ({
+            date: new Date(item.date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            }),
+            sales: item.revenue,
+            forecast: item.forecast
+        }))
+        : [];
 
-    const mockSalesData = salesChart.length > 0 ? salesChart : [
-        { date: 'Jan 1', sales: 4200, forecast: 4000 },
-        { date: 'Jan 8', sales: 3800, forecast: 4100 },
-        { date: 'Jan 15', sales: 5100, forecast: 4800 },
-        { date: 'Jan 22', sales: 4600, forecast: 4500 },
-        { date: 'Jan 29', sales: 5400, forecast: 5200 },
-    ];
+    const total =   inventoryHealth?.total || 1;
 
-    const mockPieData = inventoryHealth && !Array.isArray(inventoryHealth)
+    const pieData = inventoryHealth
     ? [
-        { name: 'Healthy', value: inventoryHealth.healthy || 0, color: '#10b981' },
-        { name: 'Low Stock', value: inventoryHealth.low_stock || 0, color: '#f59e0b' },
-        { name: 'Critical', value: inventoryHealth.critical || 0, color: '#ef4444' },
-        { name: 'Overstock', value: inventoryHealth.overstock || 0, color: '#6366f1' },
-      ]
-    : [
-        { name: 'Healthy', value: 65, color: '#10b981' },
-        { name: 'Low Stock', value: 20, color: '#f59e0b' },
-        { name: 'Critical', value: 10, color: '#ef4444' },
-        { name: 'Overstock', value: 5, color: '#6366f1' },
-      ];
+        { name: 'Healthy', value: (inventoryHealth.healthy/total)*100 || 0, color: '#10b981' },
+        { name: 'Low Stock', value: (inventoryHealth.low_stock/total)*100 || 0, color: '#f59e0b' },
+        { name: 'Critical', value: (inventoryHealth.critical/total)*100 || 0, color: '#ef4444' },
+        { name: 'Out of Stock', value: (inventoryHealth.out_of_stock/total)*100 || 0, color: '#6366f1' },
+    ]
+    : [];
+
+    console.log("SALES CHART:", salesChart);
 
 
     return (
@@ -158,7 +149,7 @@ function Dashboard() {
                         <Package size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Total Products</span>
+                        <span className="stat-label">Total Products: </span>
                         <span className="stat-value">{displayStats.total_products?.toLocaleString()}</span>
                     </div>
                 </div>
@@ -168,7 +159,7 @@ function Dashboard() {
                         <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Total Revenue</span>
+                        <span className="stat-label">Total Revenue: </span>
                         <span className="stat-value">${displayStats.total_revenue?.toLocaleString()}</span>
                         <span className={`stat-change ${displayStats.revenue_change >= 0 ? 'positive' : 'negative'}`}>
                             {displayStats.revenue_change >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
@@ -182,7 +173,7 @@ function Dashboard() {
                         <AlertTriangle size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Active Alerts</span>
+                        <span className="stat-label">Active Alerts: </span>
                         <span className="stat-value">{displayStats.active_alerts}</span>
                         <span className="stat-change text-muted">
                             {displayStats.low_stock_items} low stock items
@@ -195,7 +186,7 @@ function Dashboard() {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Forecast Accuracy</span>
+                        <span className="stat-label">Forecast Accuracy: </span>
                         <span className="stat-value">{displayStats.forecast_accuracy}%</span>
                         <span className="stat-change positive">
                             <ArrowUpRight size={14} />
@@ -218,7 +209,7 @@ function Dashboard() {
                     <div className="content-card-body">
                         <div className="chart-container">
                             <ResponsiveContainer width="100%" height={300}>
-                                <AreaChart data={mockSalesData}>
+                                <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -273,7 +264,7 @@ function Dashboard() {
                             <ResponsiveContainer width="100%" height={200}>
                                 <PieChart>
                                     <Pie
-                                        data={mockPieData}
+                                        data={pieData}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
@@ -281,7 +272,7 @@ function Dashboard() {
                                         paddingAngle={5}
                                         dataKey="value"
                                     >
-                                        {mockPieData.map((entry, index) => (
+                                        {pieData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -297,11 +288,11 @@ function Dashboard() {
                             </ResponsiveContainer>
                         </div>
                         <div className="pie-legend">
-                            {mockPieData.map((item, index) => (
+                            {pieData.map((item, index) => (
                                 <div key={index} className="legend-item">
                                     <span className="legend-dot" style={{ background: item.color || COLORS[index] }}></span>
                                     <span className="legend-label">{item.name}</span>
-                                    <span className="legend-value">{item.value}%</span>
+                                    <span className="legend-value">{item.value.toFixed(0)}%</span>
                                 </div>
                             ))}
                         </div>
@@ -385,12 +376,13 @@ function Dashboard() {
                                 </thead>
                                 <tbody>
                                     {topProducts.length > 0 ? topProducts.map((product) => (
-                                        <tr key={product.id}>
-                                            <td>{product.name}</td>
-                                            <td>{product.total_sales?.toLocaleString()}</td>
+                                        <tr key={product.product_id}>
+                                            <td>{product.product_name}</td>
+                                            <td>{product.total_quantity?.toLocaleString()}</td>
                                             <td>${product.total_revenue?.toLocaleString()}</td>
                                         </tr>
                                     )) : (
+
                                         <>
                                             <tr><td>Widget Pro X</td><td>1,234</td><td>$24,680</td></tr>
                                             <tr><td>Gadget Plus</td><td>987</td><td>$19,740</td></tr>

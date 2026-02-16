@@ -155,6 +155,23 @@ function Sales() {
         );
     }
 
+    const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="custom-tooltip">
+                <div className="tooltip-date">
+                    {new Date(label).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+                <div className="tooltip-revenue">
+                    ${payload[0].value.toLocaleString()}
+                </div>
+            </div>
+        );
+    }
+    return null;
+};
+
+
     return (
         <div className="sales-page fade-in">
             <div className="page-header">
@@ -181,7 +198,7 @@ function Sales() {
                         <DollarSign size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Total Revenue</span>
+                        <span className="stat-label">Total Revenue: </span>
                         <span className="stat-value">${totalRevenue.toLocaleString()}</span>
                     </div>
                 </div>
@@ -190,7 +207,7 @@ function Sales() {
                         <Package size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Items Sold</span>
+                        <span className="stat-label">Items Sold: </span>
                         <span className="stat-value">{totalQuantity.toLocaleString()}</span>
                     </div>
                 </div>
@@ -199,7 +216,7 @@ function Sales() {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Avg Order Value</span>
+                        <span className="stat-label">Average Order Value: </span>
                         <span className="stat-value">${avgOrderValue.toFixed(2)}</span>
                     </div>
                 </div>
@@ -208,7 +225,7 @@ function Sales() {
                         <Calendar size={24} />
                     </div>
                     <div className="stat-content">
-                        <span className="stat-label">Total Orders</span>
+                        <span className="stat-label">Total Orders: </span>
                         <span className="stat-value">{displaySales.length}</span>
                     </div>
                 </div>
@@ -233,16 +250,8 @@ function Sales() {
                                     tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 />
                                 <YAxis stroke="#64748b" fontSize={12} />
-                                <Tooltip
-                                    contentStyle={{
-                                        background: '#1e293b',
-                                        border: '1px solid #334155',
-                                        borderRadius: '8px',
-                                        color: '#f8fafc'
-                                    }}
-                                    formatter={(value) => ['$' + value.toFixed(2), 'Revenue']}
-                                />
-                                <Bar dataKey="revenue" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                <Tooltip content={<CustomTooltip />} cursor = {{fill : 'transparent'}} />
+                                <Bar dataKey="revenue" fill="#6366f1" radius={[4, 4, 0, 0]} activeBar = {false} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

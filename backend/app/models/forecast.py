@@ -35,3 +35,4 @@ class Forecast(Base):
     
     # Relationships
     product = relationship("Product", back_populates="forecasts")
+

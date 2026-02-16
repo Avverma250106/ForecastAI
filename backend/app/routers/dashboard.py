@@ -32,6 +32,14 @@ def get_dashboard_overview(
     total_products = db.query(func.count(Product.id)).filter(
         Product.user_id == current_user.id
     ).scalar() or 0
+
+    # Total revenue (all time)
+    total_revenue = db.query(
+    func.sum(Sale.total_revenue)
+    ).filter(
+    Sale.user_id == current_user.id
+    ).scalar() or 0
+
     
     # Sales metrics (last 30 days)
     sales_30d = db.query(
@@ -81,6 +89,34 @@ def get_dashboard_overview(
     
     # Calculate inventory health score
     total_inventory = len(inventory_items)
+    forecast_accuracy = 0.0
+
+    forecast_results = db.query(
+        Forecast.forecast_date,
+        Forecast.predicted_quantity,
+        func.sum(Sale.quantity).label("actual_quantity")
+    ).join(
+        Sale,
+        (Sale.product_id == Forecast.product_id) &
+        (Sale.sale_date == Forecast.forecast_date)
+    ).filter(
+        Forecast.user_id == current_user.id,
+        Forecast.forecast_date >= last_30_days
+    ).group_by(
+        Forecast.forecast_date,
+        Forecast.predicted_quantity
+    ).all()
+
+    if forecast_results:
+        accuracies = []
+        for r in forecast_results:
+            if r.actual_quantity and r.actual_quantity > 0:
+                error = abs(r.actual_quantity - r.predicted_quantity) / r.actual_quantity
+                accuracy = max(0, 1 - error)
+                accuracies.append(accuracy)
+
+        if accuracies:
+            forecast_accuracy = round((sum(accuracies) / len(accuracies)) * 100, 2)
     if total_inventory > 0:
         health_score = ((total_inventory - out_of_stock - low_stock) / total_inventory) * 100
     else:
@@ -90,13 +126,14 @@ def get_dashboard_overview(
         "total_products": total_products,
         "revenue_30d": sales_30d.revenue or 0,
         "revenue_7d": sales_7d.revenue or 0,
+        "total_revenue":total_revenue,
         "units_sold_30d": sales_30d.quantity or 0,
         "units_sold_7d": sales_7d.quantity or 0,
         "out_of_stock_count": out_of_stock,
         "low_stock_count": low_stock,
         "active_alerts": active_alerts,
         "critical_alerts": critical_alerts,
-        "inventory_health_score": round(health_score, 1)
+        "inventory_health_score": round(health_score, 1),
     }
 
 
@@ -115,26 +152,40 @@ def get_sales_chart_data(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get daily sales data for chart"""
     start_date = date.today() - timedelta(days=days)
-    
+
+    # Historical sales
     sales = db.query(
-        Sale.sale_date,
-        func.sum(Sale.total_revenue).label('revenue'),
-        func.sum(Sale.quantity).label('quantity')
+        Sale.sale_date.label("date"),
+        func.sum(Sale.total_revenue).label("revenue")
     ).filter(
         Sale.user_id == current_user.id,
         Sale.sale_date >= start_date
-    ).group_by(Sale.sale_date).order_by(Sale.sale_date).all()
-    
+    ).group_by(Sale.sale_date).all()
+
+    # Forecasts
+    forecasts = db.query(
+        Forecast.forecast_date.label("date"),
+        func.sum(Forecast.predicted_quantity).label("forecast")
+    ).filter(
+        Forecast.user_id == current_user.id,
+        Forecast.forecast_date >= start_date
+    ).group_by(Forecast.forecast_date).all()
+
+    sales_dict = {s.date: s.revenue for s in sales}
+    forecast_dict = {f.date: f.forecast for f in forecasts}
+
+    all_dates = sorted(set(sales_dict.keys()) | set(forecast_dict.keys()))
+
     return [
         {
-            "date": s.sale_date.isoformat(),
-            "revenue": s.revenue or 0,
-            "quantity": s.quantity or 0
+            "date": d.isoformat(),
+            "revenue": sales_dict.get(d, 0),
+            "forecast": forecast_dict.get(d, 0)
         }
-        for s in sales
+        for d in all_dates
     ]
+
 
 
 @router.get("/top-products")

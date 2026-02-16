@@ -188,7 +188,7 @@ function Forecasts() {
                             <TrendingUp size={24} />
                         </div>
                         <div className="stat-content">
-                            <span className="stat-label">Total Predicted Demand</span>
+                            <span className="stat-label">Total Predicted Demand: </span>
                             <span className="stat-value">{forecast.total_predicted_demand?.toLocaleString()}</span>
                         </div>
                     </div>
@@ -197,7 +197,7 @@ function Forecasts() {
                             <Target size={24} />
                         </div>
                         <div className="stat-content">
-                            <span className="stat-label">Avg Daily Demand</span>
+                            <span className="stat-label">Average Daily Demand: </span>
                             <span className="stat-value">{forecast.avg_daily_demand?.toFixed(1)}</span>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ function Forecasts() {
                             <Calendar size={24} />
                         </div>
                         <div className="stat-content">
-                            <span className="stat-label">Peak Date</span>
+                            <span className="stat-label">Peak Date: </span>
                             <span className="stat-value">{forecast.peak_date ? new Date(forecast.peak_date).toLocaleDateString() : 'N/A'}</span>
                         </div>
                     </div>
@@ -215,7 +215,7 @@ function Forecasts() {
                             <Zap size={24} />
                         </div>
                         <div className="stat-content">
-                            <span className="stat-label">Model</span>
+                            <span className="stat-label">Model: </span>
                             <span className="stat-value">{forecast.model_name || 'RandomForest'}</span>
                         </div>
                     </div>
