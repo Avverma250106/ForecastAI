@@ -136,9 +136,3 @@ npm start
 Frontend runs on:
 
 http://localhost:3000
-
-📊 Data Creation & Model Training
-
-Open the Jupyter Notebook:
-
-jupyter notebook data_creation.ipynb
