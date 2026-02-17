@@ -1,7 +1,7 @@
-pandas 
+pandas
 scikit-learn
 fastapi
-uvicorn 
+uvicorn
 psycopg2-binary
 python-dotenv
-
+email-validator
