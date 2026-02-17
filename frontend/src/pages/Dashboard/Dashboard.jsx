@@ -124,7 +124,7 @@ function Dashboard() {
     ]
     : [];
 
-    console.log("SALES CHART:", salesChart);
+   // console.log("SALES CHART:", salesChart);
 
 
     return (
